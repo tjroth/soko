@@ -2,25 +2,6 @@
 
 (in-package #:soko)
 
-(defvar *db* nil)
-
-(defun make-date (m d y)
-  "Creates a timestamp object from month date and year"
-  (encode-timestamp 0 0 0 0 d m y))
-
-
-
-(defun date-range (start end &optional dows)
-  "Returns a list of dates from start to end, limit to days of week (list of integers)
-   (dows), 0 sunday 1 monday ..."
-  (let  ((ds (cons start
-                   (loop for i from 1
-                      for d = (timestamp+ start i :day)
-                      while (timestamp<= d end)
-                      collect d))))
-    (if dows
-        (remove-if-not (lambda (d) (find (timestamp-day-of-week d) dows)) ds)
-        ds)))
 
 (defstruct task date short-name num-slots assigned type)
 
@@ -46,6 +27,8 @@
   (push task *db*))
 
 ;;DB IO functions
+(defvar *db* nil)
+
 (defun dump-db () 
  (dolist (tsk *db*)
     (format t "~{~a:~10t~a~%~}~%" tsk)))
@@ -82,13 +65,15 @@
 
 
 
-(defun assign (&key person to on (&optional repeat skip) )
-  "hello")
+
+
+;; (defun assign (&key person to on (&optional repeat skip) )
+  ;; "hello")
 
 
 ;;;;
-(defvar *start* (make-date 6 22 2018))
-(defvar *end* (make-date 12 22 2018))
+(defparameter *start* (make-date 6 22 2018))
+(defparameter *end* (make-date 12 22 2018))
 
 (defparameter *task-defs* (list (new-task-def "WMR-BODY")
                                 (new-task-def "WMR-NEURO")
@@ -120,7 +105,7 @@
                                 ))
 
 
-(setf *my-def* (make-schedule-def 
+(defparameter *my-def* (make-schedule-def 
                 :name "Fall 2018" 
                 :start *start* 
                 :end *end* 
