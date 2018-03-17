@@ -5,6 +5,8 @@
 
 (defstruct task date short-name num-slots assigned type)
 
+(defstruct event date short-name num-slots assigned type)
+
 (defstruct schedule-def name start end task-defs)
 
 (defstruct task-def short-name num-slots dow type)
