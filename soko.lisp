@@ -3,15 +3,26 @@
 (in-package #:soko)
 
 
-;;(defstruct task date short-name num-slots assigned type)
+
+(defstruct task short-name num-slots dow type staff-pool)
 
 (defstruct event date short-name num-slots assigned type)
 
 (defstruct schedule-def name start end task-defs)
 
-(defstruct task short-name num-slots dow type)
-
 (defstruct assignment name note tag)
+
+
+(defun task-to-events (task s-date e-date)
+  (let ((days (date-range s-date e-date (task-dow task))))
+    (mapcar (lambda (d) (make-event :date d
+                                    :short-name (task-short-name task)
+                                    :num-slots (task-num-slots task)
+                                    :assigned nil
+                                    :type (task-type task)))
+            days)))
+
+
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -54,11 +65,12 @@
 
 
 
-(defun new-task (short-name &optional (ns 1) (dow (list 1 2 3 4 5)) (type :required))
+(defun new-task (short-name staff-pool &optional (ns 1) (dow (list 1 2 3 4 5)) (type :required))
   (make-task :short-name short-name
-                 :num-slots ns
-                 :dow dow
-                 :type type))
+             :staff-pool staff-pool
+             :num-slots ns
+             :dow dow
+             :type type))
 
 
 
@@ -81,36 +93,43 @@
 
 ;;;;  App definition
 (defparameter *start* (make-date 6 22 2018))
-(defparameter *end* (make-date 12 22 2018))
+(defparameter *end* (make-date 6 29 2018))
 
-(defparameter *task-defs* (list (new-task "WMR-BODY")
-                                (new-task "WMR-NEURO")
-                                (new-task "WMR-FLUORO")
-                                (new-task "WMR-PEDS")
-                                (new-task "WMR-VASC1")
-                                (new-task "WMR-VASC2")
-                                (new-task "WMR-EVE1")
-                                (new-task "WMR-EVE2")
-                                (new-task "WMR-LATE" 1 (list 0 1 2 3 4 5 6 ))
-                                (new-task "WMC-MAMMO" 1 (list 1 3 5))
-                                (new-task "WMC-VASC")
-                                (new-task "WMC-FLUORO")
-                                (new-task "WM-NORTH")
-                                (new-task "WM-APEX")
-                                (new-task "WMRMP-MAMMO" 1 (list 2 4))
-                                (new-task "WMRMP-GEN" 1 (list 1 3 5))
-                                (new-task "RR-NEURO")
-                                (new-task "RR-ORTHO")
-                                (new-task "RR-MSK" 1 (list 1))
-                                (new-task "RR-MSC" 1 (list 2 4))
-                                (new-task "RR-CVA")
-                                (new-task "RR-BRO")
-                                (new-task "RR-CED")
-                                (new-task "RR-RRC")
-                                (new-task "RR-CLA" 1 (list 2 5))
-                                (new-task "RR-WFO" 1 (list 1 3 4))
-                                (new-task "RR-BKU")
-                                ))
+(defparameter *few-tasks* (list (new-task "WMR-BODY" *body-pool*)
+                                (new-task "WMR-NEURO" *neuro-pool*)))
+
+
+(defparameter *body-pool*  (list "TJR" "KDP"))
+(defparameter *neuro-pool* (list "HOL" "KHA"))
+
+;; (defparameter *task-defs* (list (new-task "WMR-BODY")
+;;                                 (new-task "WMR-NEURO")
+;;                                 (new-task "WMR-FLUORO")
+;;                                 (new-task "WMR-PEDS")
+;;                                 (new-task "WMR-VASC1")
+;;                                 (new-task "WMR-VASC2")
+;;                                 (new-task "WMR-EVE1")
+;;                                 (new-task "WMR-EVE2")
+;;                                 (new-task "WMR-LATE" 1 (list 0 1 2 3 4 5 6 ))
+;;                                 (new-task "WMC-MAMMO" 1 (list 1 3 5))
+;;                                 (new-task "WMC-VASC")
+;;                                 (new-task "WMC-FLUORO")
+;;                                 (new-task "WM-NORTH")
+;;                                 (new-task "WM-APEX")
+;;                                 (new-task "WMRMP-MAMMO" 1 (list 2 4))
+;;                                 (new-task "WMRMP-GEN" 1 (list 1 3 5))
+;;                                 (new-task "RR-NEURO")
+;;                                 (new-task "RR-ORTHO")
+;;                                 (new-task "RR-MSK" 1 (list 1))
+;;                                 (new-task "RR-MSC" 1 (list 2 4))
+;;                                 (new-task "RR-CVA")
+;;                                 (new-task "RR-BRO")
+;;                                 (new-task "RR-CED")
+;;                                 (new-task "RR-RRC")
+;;                                 (new-task "RR-CLA" 1 (list 2 5))
+;;                                 (new-task "RR-WFO" 1 (list 1 3 4))
+;;                                 (new-task "RR-BKU")
+;;                                 ))
 
 
 (defparameter *my-def* (make-schedule-def 
@@ -119,7 +138,14 @@
                 :end *end* 
                 :task-defs *task-defs*))
 
-;;(defparameter *s1* (build-schedule *my-def*))
+
+(defparameter *some-events* (mapcar (lambda (ts) (task-to-events ts *start* *end*)) *few-tasks*))
+
+
+(prin1 *some-events*)
+
+
+
 
 
 
